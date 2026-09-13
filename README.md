@@ -74,8 +74,9 @@ npm run build
 - `web/vercel.json` configures the frontend.
 - Set `VITE_API_BASE_URL` to the backend URL and `CORS_ORIGINS` to the frontend domain.
 
-See [Architecture](docs/ARCHITECTURE.md), [Model card](docs/MODEL_CARD.md), and [Experiments](docs/EXPERIMENTS.md) for details.
+See [Architecture](docs/ARCHITECTURE.md), [Model card](docs/MODEL_CARD.md), [generated diagnostics](docs/MODEL_DIAGNOSTICS.md), and [Experiments](docs/EXPERIMENTS.md) for details. The diagnostics reproduce the fixed test split and document threshold tradeoffs, calibration, coefficient interpretation, error slices, and limits on the claims.
 
 ## License
 
 MIT
+

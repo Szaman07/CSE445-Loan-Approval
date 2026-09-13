@@ -1,0 +1,567 @@
+{
+  "model_version": "0.1.0",
+  "dataset_sha256": "1764e49a721b390f22485576c894e1db26cf87ec015b6a60ff5370fad1b7112e",
+  "split_seed": 42,
+  "test_rows": 1990,
+  "selected_threshold": 0.4469999999999999,
+  "selected_threshold_metrics": {
+    "threshold": 0.4469999999999999,
+    "f1": 0.6844221105527638,
+    "precision": 0.5618811881188119,
+    "recall": 0.8753213367609255,
+    "accuracy": 0.6844221105527638,
+    "balanced_accuracy": 0.7186012624398688,
+    "roc_auc": 0.785243113000246,
+    "average_precision": 0.6864992582687386,
+    "brier": 0.18748033579644013,
+    "log_loss": 0.5475210986759625,
+    "confusion": {
+      "tn": 681,
+      "fp": 531,
+      "fn": 97,
+      "tp": 681
+    }
+  },
+  "threshold_tradeoffs": [
+    {
+      "threshold": 0.3,
+      "f1": 0.6654462242562929,
+      "precision": 0.5167022032693674,
+      "recall": 0.9344473007712082,
+      "accuracy": 0.6326633165829145,
+      "balanced_accuracy": 0.6866955975803235,
+      "roc_auc": 0.785243113000246,
+      "average_precision": 0.6864992582687386,
+      "brier": 0.18748033579644013,
+      "log_loss": 0.5475210986759625,
+      "confusion": {
+        "tn": 532,
+        "fp": 680,
+        "fn": 51,
+        "tp": 727
+      }
+    },
+    {
+      "threshold": 0.4,
+      "f1": 0.6785542168674699,
+      "precision": 0.5427910562837317,
+      "recall": 0.9048843187660668,
+      "accuracy": 0.6648241206030151,
+      "balanced_accuracy": 0.7078051956866638,
+      "roc_auc": 0.785243113000246,
+      "average_precision": 0.6864992582687386,
+      "brier": 0.18748033579644013,
+      "log_loss": 0.5475210986759625,
+      "confusion": {
+        "tn": 619,
+        "fp": 593,
+        "fn": 74,
+        "tp": 704
+      }
+    },
+    {
+      "threshold": 0.447,
+      "f1": 0.6844221105527638,
+      "precision": 0.5618811881188119,
+      "recall": 0.8753213367609255,
+      "accuracy": 0.6844221105527638,
+      "balanced_accuracy": 0.7186012624398688,
+      "roc_auc": 0.785243113000246,
+      "average_precision": 0.6864992582687386,
+      "brier": 0.18748033579644013,
+      "log_loss": 0.5475210986759625,
+      "confusion": {
+        "tn": 681,
+        "fp": 531,
+        "fn": 97,
+        "tp": 681
+      }
+    },
+    {
+      "threshold": 0.5,
+      "f1": 0.678938819707634,
+      "precision": 0.5865294667913938,
+      "recall": 0.8059125964010283,
+      "accuracy": 0.7020100502512563,
+      "balanced_accuracy": 0.7206130638770818,
+      "roc_auc": 0.785243113000246,
+      "average_precision": 0.6864992582687386,
+      "brier": 0.18748033579644013,
+      "log_loss": 0.5475210986759625,
+      "confusion": {
+        "tn": 770,
+        "fp": 442,
+        "fn": 151,
+        "tp": 627
+      }
+    },
+    {
+      "threshold": 0.6,
+      "f1": 0.6044029352901935,
+      "precision": 0.6282940360610264,
+      "recall": 0.5822622107969152,
+      "accuracy": 0.7020100502512563,
+      "balanced_accuracy": 0.680570049292847,
+      "roc_auc": 0.785243113000246,
+      "average_precision": 0.6864992582687386,
+      "brier": 0.18748033579644013,
+      "log_loss": 0.5475210986759625,
+      "confusion": {
+        "tn": 944,
+        "fp": 268,
+        "fn": 325,
+        "tp": 453
+      }
+    },
+    {
+      "threshold": 0.7,
+      "f1": 0.4511013215859031,
+      "precision": 0.7170868347338936,
+      "recall": 0.32904884318766064,
+      "accuracy": 0.6869346733668342,
+      "balanced_accuracy": 0.6228577549271637,
+      "roc_auc": 0.785243113000246,
+      "average_precision": 0.6864992582687386,
+      "brier": 0.18748033579644013,
+      "log_loss": 0.5475210986759625,
+      "confusion": {
+        "tn": 1111,
+        "fp": 101,
+        "fn": 522,
+        "tp": 256
+      }
+    }
+  ],
+  "calibration_bins": [
+    {
+      "range": "0.003\u20130.070",
+      "rows": 199,
+      "mean_score": 0.03577256834778228,
+      "observed_rate": 0.04020100502512563,
+      "absolute_gap": 0.004428436677343349
+    },
+    {
+      "range": "0.070\u20130.171",
+      "rows": 199,
+      "mean_score": 0.1152131809689309,
+      "observed_rate": 0.07035175879396985,
+      "absolute_gap": 0.04486142217496106
+    },
+    {
+      "range": "0.171\u20130.314",
+      "rows": 199,
+      "mean_score": 0.2403981015370141,
+      "observed_rate": 0.15577889447236182,
+      "absolute_gap": 0.08461920706465229
+    },
+    {
+      "range": "0.314\u20130.462",
+      "rows": 199,
+      "mean_score": 0.39278927086824,
+      "observed_rate": 0.24120603015075376,
+      "absolute_gap": 0.15158324071748625
+    },
+    {
+      "range": "0.462\u20130.527",
+      "rows": 199,
+      "mean_score": 0.4939091596782091,
+      "observed_rate": 0.4221105527638191,
+      "absolute_gap": 0.07179860691439
+    },
+    {
+      "range": "0.527\u20130.583",
+      "rows": 199,
+      "mean_score": 0.5545387822868911,
+      "observed_rate": 0.5376884422110553,
+      "absolute_gap": 0.016850340075835857
+    },
+    {
+      "range": "0.583\u20130.629",
+      "rows": 199,
+      "mean_score": 0.6060087566796549,
+      "observed_rate": 0.48743718592964824,
+      "absolute_gap": 0.11857157075000668
+    },
+    {
+      "range": "0.629\u20130.686",
+      "rows": 199,
+      "mean_score": 0.6572085576386709,
+      "observed_rate": 0.5628140703517588,
+      "absolute_gap": 0.09439448728691213
+    },
+    {
+      "range": "0.686\u20130.784",
+      "rows": 199,
+      "mean_score": 0.7276929785502995,
+      "observed_rate": 0.5778894472361809,
+      "absolute_gap": 0.1498035313141186
+    },
+    {
+      "range": "0.784\u20130.983",
+      "rows": 199,
+      "mean_score": 0.8736717563847927,
+      "observed_rate": 0.8140703517587939,
+      "absolute_gap": 0.05960140462599872
+    }
+  ],
+  "expected_calibration_error": 0.0796512247601705,
+  "coefficients": {
+    "positive": [
+      {
+        "feature": "Credit_Score",
+        "coefficient": 1.2023655881210191
+      },
+      {
+        "feature": "Applicant_Income",
+        "coefficient": 0.3661285313669311
+      },
+      {
+        "feature": "Employment_Status_Contract",
+        "coefficient": 0.25626855888939337
+      },
+      {
+        "feature": "Employer_Category_MNC",
+        "coefficient": 0.16606246941169292
+      },
+      {
+        "feature": "Loan_Purpose_Business",
+        "coefficient": 0.1608915554101643
+      },
+      {
+        "feature": "Savings",
+        "coefficient": 0.07661557654075295
+      },
+      {
+        "feature": "missingindicator_Dependents",
+        "coefficient": 0.03676159525477825
+      },
+      {
+        "feature": "Loan_Purpose_Education",
+        "coefficient": 0.015388636001553732
+      },
+      {
+        "feature": "Property_Area_Urban",
+        "coefficient": 0.010843607824707063
+      },
+      {
+        "feature": "Coapplicant_Income",
+        "coefficient": 0.003770816915236014
+      }
+    ],
+    "negative": [
+      {
+        "feature": "DTI_Ratio",
+        "coefficient": -1.1106887991948555
+      },
+      {
+        "feature": "Employment_Status_Unemployed",
+        "coefficient": -0.3965879954278755
+      },
+      {
+        "feature": "Loan_Purpose_Car",
+        "coefficient": -0.3641132252714252
+      },
+      {
+        "feature": "Education_Level_Not Graduate",
+        "coefficient": -0.2591242217855831
+      },
+      {
+        "feature": "Employer_Category_Government",
+        "coefficient": -0.14780282991112026
+      },
+      {
+        "feature": "Loan_Amount",
+        "coefficient": -0.11228273464937923
+      },
+      {
+        "feature": "Property_Area_Rural",
+        "coefficient": -0.10773328331875906
+      },
+      {
+        "feature": "Employer_Category_Unemployed",
+        "coefficient": -0.09348498469453029
+      },
+      {
+        "feature": "Employment_Status_Salaried",
+        "coefficient": -0.08993951367817041
+      },
+      {
+        "feature": "Loan_Purpose_Home",
+        "coefficient": -0.08694161759145903
+      }
+    ]
+  },
+  "error_slices": [
+    {
+      "feature": "Credit_Score",
+      "group": "(549.999, 631.0]",
+      "rows": 465,
+      "negative_rows": 381,
+      "positive_rows": 84,
+      "false_positive_rate": 0.13648293963254593,
+      "false_negative_rate": 0.36904761904761907
+    },
+    {
+      "feature": "Credit_Score",
+      "group": "(631.0, 692.0]",
+      "rows": 472,
+      "negative_rows": 302,
+      "positive_rows": 170,
+      "false_positive_rate": 0.4205298013245033,
+      "false_negative_rate": 0.18235294117647058
+    },
+    {
+      "feature": "Credit_Score",
+      "group": "(692.0, 738.0]",
+      "rows": 459,
+      "negative_rows": 245,
+      "positive_rows": 214,
+      "false_positive_rate": 0.5959183673469388,
+      "false_negative_rate": 0.08411214953271028
+    },
+    {
+      "feature": "Credit_Score",
+      "group": "(738.0, 799.0]",
+      "rows": 460,
+      "negative_rows": 204,
+      "positive_rows": 256,
+      "false_positive_rate": 0.7794117647058824,
+      "false_negative_rate": 0.0546875
+    },
+    {
+      "feature": "Credit_Score",
+      "group": "Missing",
+      "rows": 134,
+      "negative_rows": 80,
+      "positive_rows": 54,
+      "false_positive_rate": 0.5875,
+      "false_negative_rate": 0.05555555555555555
+    },
+    {
+      "feature": "DTI_Ratio",
+      "group": "(0.099, 0.21]",
+      "rows": 495,
+      "negative_rows": 217,
+      "positive_rows": 278,
+      "false_positive_rate": 0.7511520737327189,
+      "false_negative_rate": 0.046762589928057555
+    },
+    {
+      "feature": "DTI_Ratio",
+      "group": "(0.21, 0.31]",
+      "rows": 456,
+      "negative_rows": 243,
+      "positive_rows": 213,
+      "false_positive_rate": 0.5761316872427984,
+      "false_negative_rate": 0.07511737089201878
+    },
+    {
+      "feature": "DTI_Ratio",
+      "group": "(0.31, 0.44]",
+      "rows": 485,
+      "negative_rows": 312,
+      "positive_rows": 173,
+      "false_positive_rate": 0.47115384615384615,
+      "false_negative_rate": 0.2138728323699422
+    },
+    {
+      "feature": "DTI_Ratio",
+      "group": "(0.44, 0.6]",
+      "rows": 453,
+      "negative_rows": 374,
+      "positive_rows": 79,
+      "false_positive_rate": 0.12032085561497326,
+      "false_negative_rate": 0.35443037974683544
+    },
+    {
+      "feature": "DTI_Ratio",
+      "group": "Missing",
+      "rows": 101,
+      "negative_rows": 66,
+      "positive_rows": 35,
+      "false_positive_rate": 0.5454545454545454,
+      "false_negative_rate": 0.08571428571428572
+    },
+    {
+      "feature": "Loan_Amount",
+      "group": "(1014.999, 9311.0]",
+      "rows": 479,
+      "negative_rows": 268,
+      "positive_rows": 211,
+      "false_positive_rate": 0.48134328358208955,
+      "false_negative_rate": 0.14218009478672985
+    },
+    {
+      "feature": "Loan_Amount",
+      "group": "(20532.0, 28968.0]",
+      "rows": 478,
+      "negative_rows": 304,
+      "positive_rows": 174,
+      "false_positive_rate": 0.4276315789473684,
+      "false_negative_rate": 0.1206896551724138
+    },
+    {
+      "feature": "Loan_Amount",
+      "group": "(28968.0, 39991.0]",
+      "rows": 478,
+      "negative_rows": 312,
+      "positive_rows": 166,
+      "false_positive_rate": 0.4230769230769231,
+      "false_negative_rate": 0.13855421686746988
+    },
+    {
+      "feature": "Loan_Amount",
+      "group": "(9311.0, 20532.0]",
+      "rows": 478,
+      "negative_rows": 277,
+      "positive_rows": 201,
+      "false_positive_rate": 0.4332129963898917,
+      "false_negative_rate": 0.1044776119402985
+    },
+    {
+      "feature": "Loan_Amount",
+      "group": "Missing",
+      "rows": 77,
+      "negative_rows": 51,
+      "positive_rows": 26,
+      "false_positive_rate": 0.39215686274509803,
+      "false_negative_rate": 0.07692307692307693
+    },
+    {
+      "feature": "Employment_Status",
+      "group": "Contract",
+      "rows": 417,
+      "negative_rows": 248,
+      "positive_rows": 169,
+      "false_positive_rate": 0.4596774193548387,
+      "false_negative_rate": 0.07100591715976332
+    },
+    {
+      "feature": "Employment_Status",
+      "group": "Missing",
+      "rows": 104,
+      "negative_rows": 71,
+      "positive_rows": 33,
+      "false_positive_rate": 0.36619718309859156,
+      "false_negative_rate": 0.15151515151515152
+    },
+    {
+      "feature": "Employment_Status",
+      "group": "Salaried",
+      "rows": 921,
+      "negative_rows": 556,
+      "positive_rows": 365,
+      "false_positive_rate": 0.4442446043165468,
+      "false_negative_rate": 0.15342465753424658
+    },
+    {
+      "feature": "Employment_Status",
+      "group": "Self-employed",
+      "rows": 373,
+      "negative_rows": 229,
+      "positive_rows": 144,
+      "false_positive_rate": 0.47161572052401746,
+      "false_negative_rate": 0.0763888888888889
+    },
+    {
+      "feature": "Employment_Status",
+      "group": "Unemployed",
+      "rows": 175,
+      "negative_rows": 108,
+      "positive_rows": 67,
+      "false_positive_rate": 0.3333333333333333,
+      "false_negative_rate": 0.19402985074626866
+    },
+    {
+      "feature": "Loan_Purpose",
+      "group": "Business",
+      "rows": 418,
+      "negative_rows": 241,
+      "positive_rows": 177,
+      "false_positive_rate": 0.46473029045643155,
+      "false_negative_rate": 0.10734463276836158
+    },
+    {
+      "feature": "Loan_Purpose",
+      "group": "Car",
+      "rows": 372,
+      "negative_rows": 237,
+      "positive_rows": 135,
+      "false_positive_rate": 0.38396624472573837,
+      "false_negative_rate": 0.14074074074074075
+    },
+    {
+      "feature": "Loan_Purpose",
+      "group": "Education",
+      "rows": 356,
+      "negative_rows": 211,
+      "positive_rows": 145,
+      "false_positive_rate": 0.4834123222748815,
+      "false_negative_rate": 0.14482758620689656
+    },
+    {
+      "feature": "Loan_Purpose",
+      "group": "Home",
+      "rows": 387,
+      "negative_rows": 245,
+      "positive_rows": 142,
+      "false_positive_rate": 0.4530612244897959,
+      "false_negative_rate": 0.11971830985915492
+    },
+    {
+      "feature": "Loan_Purpose",
+      "group": "Missing",
+      "rows": 113,
+      "negative_rows": 64,
+      "positive_rows": 49,
+      "false_positive_rate": 0.46875,
+      "false_negative_rate": 0.08163265306122448
+    },
+    {
+      "feature": "Loan_Purpose",
+      "group": "Personal",
+      "rows": 344,
+      "negative_rows": 214,
+      "positive_rows": 130,
+      "false_positive_rate": 0.397196261682243,
+      "false_negative_rate": 0.13076923076923078
+    },
+    {
+      "feature": "Property_Area",
+      "group": "Missing",
+      "rows": 107,
+      "negative_rows": 53,
+      "positive_rows": 54,
+      "false_positive_rate": 0.37735849056603776,
+      "false_negative_rate": 0.1111111111111111
+    },
+    {
+      "feature": "Property_Area",
+      "group": "Rural",
+      "rows": 588,
+      "negative_rows": 364,
+      "positive_rows": 224,
+      "false_positive_rate": 0.45054945054945056,
+      "false_negative_rate": 0.10714285714285714
+    },
+    {
+      "feature": "Property_Area",
+      "group": "Semiurban",
+      "rows": 379,
+      "negative_rows": 250,
+      "positive_rows": 129,
+      "false_positive_rate": 0.428,
+      "false_negative_rate": 0.14728682170542637
+    },
+    {
+      "feature": "Property_Area",
+      "group": "Urban",
+      "rows": 916,
+      "negative_rows": 545,
+      "positive_rows": 371,
+      "false_positive_rate": 0.44036697247706424,
+      "false_negative_rate": 0.1293800539083558
+    }
+  ]
+}
+
