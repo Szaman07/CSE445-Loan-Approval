@@ -2,7 +2,7 @@
 
 ## Purpose
 
-CreditWise predicts the historical `Loan_Approved` label in the supplied academic dataset. It is an educational portfolio system for demonstrating leakage-safe classification, threshold selection, API serving, and product communication. Its score is not a real underwriting decision or a calibrated probability of repayment.
+CreditWise predicts the `Loan_Approved` label in the supplied academic dataset. Its score is not a calibrated probability of repayment.
 
 ## Data
 
@@ -42,3 +42,4 @@ The test confusion matrix is TN 681, FP 531, FN 97, TP 681. The result closely r
 - High recall comes with many false positives; the threshold reflects F1, not a real lending cost function.
 - Group fairness cannot be claimed merely because selected sensitive fields are excluded; proxy effects may remain.
 - Predictions should be treated as model demonstrations and reviewed with the disclosed threshold and version.
+
