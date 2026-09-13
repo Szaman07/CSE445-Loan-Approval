@@ -14,7 +14,7 @@ const summary = { profile: metadata.dataset, labels: [{ label: 'Not approved', c
 const schema = { profile: metadata.dataset, features: [{ feature: 'Credit_Score', display_name: 'Credit Score', kind: 'numeric', used_by_model: true, derived: false, definition: null, missing: 0, missing_rate: 0, summary: { min: 300, median: 680, max: 850 } }] }
 function jsonResponse(payload: unknown) { return Promise.resolve(new Response(JSON.stringify(payload), { status: 200, headers: { 'Content-Type': 'application/json' } })) }
 
-describe('CreditWise case study', () => {
+describe('CreditWise course project', () => {
   beforeEach(() => {
     window.history.replaceState({}, '', '/')
     vi.stubGlobal('scrollTo', vi.fn())
@@ -33,11 +33,11 @@ describe('CreditWise case study', () => {
 
   it('uses routes and completes a scenario comparison', async () => {
     render(<App />)
-    expect(await screen.findByRole('heading', { name: /From messy loan data/i })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: /Loan approval dataset analysis/i })).toBeInTheDocument()
     await screen.findByText('Live model')
     fireEvent.click(screen.getByRole('button', { name: 'Open simulator' }))
     expect(window.location.pathname).toBe('/simulator')
-    expect(await screen.findByRole('heading', { name: /See what changes/i })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: /Compare two applicant profiles/i })).toBeInTheDocument()
     fireEvent.change(screen.getByLabelText('Credit score'), { target: { value: '730' } })
     fireEvent.click(screen.getByRole('button', { name: 'Compare scenario' }))
     await waitFor(() => expect(screen.getByText('+3.4%')).toBeInTheDocument())

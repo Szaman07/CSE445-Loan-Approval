@@ -16,7 +16,7 @@ export function Layout({ route, navigate, apiReady, children }: { route: RouteId
   return <div className="site-shell">
     <a className="skip-link" href="#main-content">Skip to content</a>
     <header className="site-header">
-      <button className="brand" onClick={() => go('overview')} aria-label="CreditWise home"><span className="brand-mark">CW</span><span><strong>CreditWise</strong><small>ML CASE STUDY</small></span></button>
+      <button className="brand" onClick={() => go('overview')} aria-label="CreditWise home"><span className="brand-mark">CW</span><span><strong>CreditWise</strong><small>CSE445 PROJECT</small></span></button>
       <nav className="desktop-nav" aria-label="Primary navigation">
         {routes.map(({ id, label }) => <button key={id} className={route === id ? 'active' : ''} aria-current={route === id ? 'page' : undefined} onClick={() => go(id)}>{label}</button>)}
       </nav>
@@ -25,6 +25,6 @@ export function Layout({ route, navigate, apiReady, children }: { route: RouteId
     </header>
     {open && <><button className="nav-backdrop" aria-label="Close navigation" onClick={() => setOpen(false)} /><div id="mobile-navigation" className="mobile-nav" role="dialog" aria-modal="true" aria-label="Navigation"><div className="mobile-nav-head"><strong>Navigate</strong><button aria-label="Close navigation" onClick={() => { setOpen(false); menuButton.current?.focus() }}><X /></button></div>{routes.map(({ id, label, icon: Icon }) => <button key={id} className={route === id ? 'active' : ''} onClick={() => go(id)}><Icon size={18} />{label}</button>)}</div></>}
     <main id="main-content" tabIndex={-1}>{children}</main>
-    <footer><span>CreditWise · reproducible ML case study</span><span>Predicts observed labels, not repayment</span></footer>
+    <footer><span>CSE445 loan approval project</span><span>Predicts observed labels, not repayment</span></footer>
   </div>
 }
