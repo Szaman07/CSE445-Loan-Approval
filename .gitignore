@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+node_modules/
+web/dist/
+artifacts/models/*.joblib
+artifacts/models/*.json
+artifacts/manifests/split_manifest.json
+.env
+.DS_Store
+
+artifacts/visual-qa/
+artifacts/*.png
+*.tsbuildinfo
