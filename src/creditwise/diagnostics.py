@@ -11,16 +11,19 @@ import pandas as pd
 
 from creditwise.data import labeled_xy, load_dataset
 from creditwise.modeling import threshold_metrics
-from creditwise.settings import DEFAULT_DATA_PATH, DEFAULT_MODEL_PATH, PROJECT_ROOT
-from creditwise.training import split_data
+from creditwise.settings import DEFAULT_DATA_PATH, DEFAULT_MODEL_PATH, MANIFEST_DIR, PROJECT_ROOT
 
 DEFAULT_JSON_PATH = PROJECT_ROOT / "docs" / "model_diagnostics.json"
 DEFAULT_MARKDOWN_PATH = PROJECT_ROOT / "docs" / "MODEL_DIAGNOSTICS.md"
+DEFAULT_MANIFEST_PATH = MANIFEST_DIR / "split_manifest.json"
 
 
 def _calibration_bins(y_true: pd.Series, probabilities: np.ndarray, count: int = 10) -> list[dict[str, Any]]:
     frame = pd.DataFrame({"label": np.asarray(y_true), "score": probabilities})
     frame["bin"] = pd.qcut(frame["score"], q=count, duplicates="drop")
+    # qcut produces no intervals when every model score is identical.
+    if frame["bin"].isna().all():
+        frame["bin"] = pd.cut(frame["score"], bins=1)
     rows: list[dict[str, Any]] = []
     for interval, group in frame.groupby("bin", observed=True):
         rows.append(
@@ -46,8 +49,14 @@ def _coefficient_rows(pipeline: Any) -> dict[str, list[dict[str, Any]]]:
         if not np.isclose(value, 0.0)
     ]
     return {
-        "positive": sorted(rows, key=lambda row: row["coefficient"], reverse=True)[:10],
-        "negative": sorted(rows, key=lambda row: row["coefficient"])[:10],
+        "positive": sorted(
+            (row for row in rows if row["coefficient"] > 0),
+            key=lambda row: row["coefficient"], reverse=True,
+        )[:10],
+        "negative": sorted(
+            (row for row in rows if row["coefficient"] < 0),
+            key=lambda row: row["coefficient"],
+        )[:10],
     }
 
 
@@ -89,18 +98,44 @@ def _slice_rows(
     return rows
 
 
-def build_diagnostics(data_path: Path, model_path: Path) -> dict[str, Any]:
+def _test_indices(bundle: dict[str, Any], profile: Any, manifest_path: Path) -> list[int]:
+    """Use the saved partition only after verifying its model/data provenance."""
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    metadata = bundle["metadata"]
+    if not (profile.sha256 == metadata["dataset"]["sha256"] == manifest["dataset_sha256"]):
+        raise ValueError("Dataset fingerprint does not match the frozen model and split manifest.")
+    if manifest["seed"] != metadata["split"]["seed"]:
+        raise ValueError("Split manifest seed does not match model metadata.")
+    partitions = []
+    for name in ("train", "validation", "test"):
+        indices = manifest[f"{name}_indices"]
+        if not isinstance(indices, list) or any(type(index) is not int for index in indices):
+            raise ValueError("Split manifest indices must be integer lists.")
+        if len(indices) != metadata["split"][f"{name}_rows"]:
+            raise ValueError(f"Split manifest {name} row count does not match model metadata.")
+        partitions.extend(indices)
+    if len(partitions) != profile.labeled_rows or set(partitions) != set(range(profile.labeled_rows)):
+        raise ValueError("Split manifest must partition every labeled row exactly once.")
+    return manifest["test_indices"]
+
+
+def build_diagnostics(
+    data_path: Path, model_path: Path, manifest_path: Path = DEFAULT_MANIFEST_PATH
+) -> dict[str, Any]:
     bundle = joblib.load(model_path)
     frame, profile = load_dataset(data_path)
     X, y = labeled_xy(frame)
-    _, _, X_test, _, _, y_test, _, _, _ = split_data(X, y)
+    indices = _test_indices(bundle, profile, manifest_path)
+    X_test, y_test = X.iloc[indices], y.iloc[indices]
     features = bundle["feature_order"]
+    if features != bundle["metadata"]["feature_order"]:
+        raise ValueError("Model feature order does not match its metadata.")
     pipeline = bundle["pipeline"]
     threshold = float(bundle["threshold"])
     probabilities = pipeline.predict_proba(X_test[features])[:, 1]
     predictions = (probabilities >= threshold).astype(int)
 
-    thresholds = sorted({0.30, 0.40, round(threshold, 3), 0.50, 0.60, 0.70})
+    thresholds = sorted({0.30, 0.40, threshold, 0.50, 0.60, 0.70})
     calibration = _calibration_bins(y_test, probabilities)
     slices = _slice_rows(X_test, y_test, predictions)
     return {
@@ -108,6 +143,7 @@ def build_diagnostics(data_path: Path, model_path: Path) -> dict[str, Any]:
         "dataset_sha256": profile.sha256,
         "split_seed": bundle["metadata"]["split"]["seed"],
         "test_rows": len(y_test),
+        "split_source": "saved split manifest (dataset fingerprint and partition verified)",
         "selected_threshold": threshold,
         "selected_threshold_metrics": threshold_metrics(y_test, probabilities, threshold),
         "threshold_tradeoffs": [threshold_metrics(y_test, probabilities, value) for value in thresholds],
@@ -134,12 +170,12 @@ def render_markdown(report: dict[str, Any]) -> str:
     selected = report["selected_threshold_metrics"]
     slice_rows = report["error_slices"]
     highest_fp = sorted(
-        (row for row in slice_rows if row["false_positive_rate"] is not None),
+        (row for row in slice_rows if row["negative_rows"] >= 50),
         key=lambda row: row["false_positive_rate"],
         reverse=True,
     )[:6]
     highest_fn = sorted(
-        (row for row in slice_rows if row["false_negative_rate"] is not None),
+        (row for row in slice_rows if row["positive_rows"] >= 50),
         key=lambda row: row["false_negative_rate"],
         reverse=True,
     )[:6]
@@ -155,6 +191,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Dataset SHA-256: `{report['dataset_sha256']}`",
         f"- Split seed: `{report['split_seed']}`",
         f"- Test rows: {report['test_rows']:,}",
+        f"- Split source: {report['split_source']}",
         f"- Validation-selected threshold: {report['selected_threshold']:.3f}",
         f"- Test confusion matrix: TN {selected['confusion']['tn']}, FP {selected['confusion']['fp']}, FN {selected['confusion']['fn']}, TP {selected['confusion']['tp']}",
         "",
@@ -190,7 +227,7 @@ def render_markdown(report: dict[str, Any]) -> str:
     lines.extend(
         [
             "",
-            f"The equal-frequency expected calibration error is {_percent(report['expected_calibration_error'])}. This descriptive value confirms that the score should not be presented as a probability of repayment or approval.",
+            f"The equal-frequency expected calibration error is {_percent(report['expected_calibration_error'])}. It is sensitive to binning and this test sample; the uncalibrated score should not be presented as a probability of repayment or approval.",
             "",
             "## Coefficient inspection",
             "",
@@ -206,7 +243,7 @@ def render_markdown(report: dict[str, Any]) -> str:
             "",
             "## Error slices",
             "",
-            "The tables rank descriptive test-set slices with at least 50 rows. They identify places to investigate; they do not establish fairness or generalization because the dataset provenance and real population are unknown.",
+            "The tables rank descriptive test-set slices with at least 50 examples in the relevant rate denominator (negative labels for false-positive rates; positive labels for false-negative rates). They identify places to investigate; they do not establish fairness or generalization because the dataset provenance and real population are unknown.",
             "",
             "### Highest false-positive rates",
             "",
@@ -252,14 +289,17 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Generate CreditWise model diagnostics.")
     parser.add_argument("--data", type=Path, default=DEFAULT_DATA_PATH)
     parser.add_argument("--model", type=Path, default=DEFAULT_MODEL_PATH)
+    parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST_PATH)
     parser.add_argument("--json", type=Path, default=DEFAULT_JSON_PATH)
     parser.add_argument("--markdown", type=Path, default=DEFAULT_MARKDOWN_PATH)
     args = parser.parse_args()
     if not args.model.exists():
         raise FileNotFoundError("Model artifact unavailable; run `python -m creditwise.training` first.")
-    report = build_diagnostics(args.data, args.model)
-    args.json.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
-    args.markdown.write_text(render_markdown(report), encoding="utf-8")
+    report = build_diagnostics(args.data, args.model, args.manifest)
+    args.json.parent.mkdir(parents=True, exist_ok=True)
+    args.markdown.parent.mkdir(parents=True, exist_ok=True)
+    args.json.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8", newline="\n")
+    args.markdown.write_text(render_markdown(report), encoding="utf-8", newline="\n")
     print(json.dumps({"json": str(args.json), "markdown": str(args.markdown)}, indent=2))
 
 

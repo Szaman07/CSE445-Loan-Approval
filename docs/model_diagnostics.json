@@ -3,6 +3,7 @@
   "dataset_sha256": "1764e49a721b390f22485576c894e1db26cf87ec015b6a60ff5370fad1b7112e",
   "split_seed": 42,
   "test_rows": 1990,
+  "split_source": "saved split manifest (dataset fingerprint and partition verified)",
   "selected_threshold": 0.4469999999999999,
   "selected_threshold_metrics": {
     "threshold": 0.4469999999999999,
@@ -60,7 +61,7 @@
       }
     },
     {
-      "threshold": 0.447,
+      "threshold": 0.4469999999999999,
       "f1": 0.6844221105527638,
       "precision": 0.5618811881188119,
       "recall": 0.8753213367609255,
@@ -564,4 +565,3 @@
     }
   ]
 }
-
