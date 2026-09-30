@@ -1,19 +1,16 @@
-# Experiment record
+# Experiment notes
 
-The original course work contained several incompatible evaluation paths. Some notebooks performed preprocessing before splitting, and the submitted notebook selected a threshold against test labels. Those outputs remain historical references and are excluded from the production evidence chain.
+Notebook `6851.ipynb` reported test F1 of 0.6851, precision of 0.5634, and recall of 0.8740. It selected its threshold on validation data, but some preprocessing happened before splitting. Other course notebooks used different evaluation methods, including test-label threshold selection, so their scores are not directly comparable.
 
-Notebook `6851.ipynb` provided the most credible starting point: a class-balanced L1 logistic regression with separate train, validation, and test partitions. Its saved test F1 was 0.6851 with 0.5634 precision and 0.8740 recall. It tuned the threshold on validation data, although several learned preprocessing choices occurred before the split.
+The current implementation fits preprocessing within each training fold. It compares 40 logistic regression configurations: L1/L2 penalties, five C values, raw/engineered features, and full/15-input feature sets. The top three 15-input candidates by training cross-validation F1 advance to validation. Full-feature candidates are comparison baselines; they cannot become the dashboard model.
 
-The implementation moves every learned preprocessing step inside the pipeline and uses a fixed raw-row split. The first 40-candidate benchmark selected the privacy-aware raw policy and achieved 0.6844 F1 on the untouched test partition. This establishes a trustworthy baseline within 0.001 of notebook 6851.
+Validation F1 selects the model and threshold. The current winner is class-balanced L1 logistic regression, raw features, C=0.3, threshold 0.447. Test F1 is 0.6844. The audit rerun reproduced these results.
 
-Planned follow-up experiments are ordered by value rather than novelty:
+Possible follow-ups:
 
-1. Repeated stratified cross-validation and bootstrap confidence intervals to quantify score variance.
-2. HistGradientBoosting, calibrated linear SVM, ExtraTrees, RandomForest, and gradient-boosted tree candidates under the same split contract.
-3. Out-of-fold soft voting and rank averaging among genuinely complementary models.
-4. Narrow validation threshold search around the precision-recall optimum, plus threshold stability across folds.
-5. Probability calibration comparison using Brier score and reliability curves.
-6. Feature ablation for engineered ratios, missingness indicators, and the privacy-aware policy.
-7. Slice analysis by non-sensitive operational segments and subgroup analysis kept strictly descriptive.
+- Compare tree models and calibrated linear SVMs under the same preprocessing and split rules.
+- Check threshold stability and model variation with repeated cross-validation.
+- Test feature ablations and ensembles using development data.
+- Evaluate calibration before calling scores probabilities.
 
-Every follow-up must select models and thresholds without reading test labels. The test partition is used once for the final frozen candidate of a documented experiment round.
+Choose follow-up models and thresholds using training/validation data. This dataset has already been explored and evaluated; rerunning its fixed test split does not provide new independent evidence. Use new data for independent validation.

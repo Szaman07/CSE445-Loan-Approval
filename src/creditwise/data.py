@@ -75,8 +75,16 @@ def load_dataset(path: Path) -> tuple[pd.DataFrame, DatasetProfile]:
         raise ValueError(f"Dataset is missing columns: {', '.join(missing_columns)}")
 
     frame = frame[EXPECTED_COLUMNS].copy()
+    for feature in NUMERIC_FEATURES:
+        try:
+            numeric = pd.to_numeric(frame[feature], errors="raise")
+        except (TypeError, ValueError) as error:
+            raise ValueError(f"Invalid numeric values in {feature}") from error
+        if np.isinf(numeric.dropna().to_numpy(dtype=float)).any():
+            raise ValueError(f"Non-finite numeric values in {feature}")
+        frame[feature] = numeric
     for feature in CATEGORICAL_FEATURES:
-        cleaned = frame[feature].astype("string").str.strip()
+        cleaned = frame[feature].astype("string").str.strip().replace("", pd.NA)
         frame[feature] = cleaned.astype(object).where(cleaned.notna(), np.nan)
 
     normalized_target = frame[TARGET_COLUMN].astype("string").str.strip().str.lower()

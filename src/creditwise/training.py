@@ -134,7 +134,10 @@ def train(data_path: Path, model_path: Path, metadata_path: Path) -> dict[str, o
         key=lambda result: (result.cv_f1_mean, result.cv_average_precision_mean),
         reverse=True,
     )
-    finalist_names = {result.name for result in ranked[:3]}
+    # Full-feature runs are benchmarks; the served model must match the public input contract.
+    public_names = {spec.name for spec in specs if spec.public_policy}
+    public_ranked = [result for result in ranked if result.name in public_names]
+    finalist_names = {result.name for result in public_ranked[:3]}
     finalists: list[dict[str, object]] = []
     fitted: dict[str, object] = {}
 
@@ -181,6 +184,7 @@ def train(data_path: Path, model_path: Path, metadata_path: Path) -> dict[str, o
             "test_rows": len(test_idx),
         },
         "winner": winner,
+        "selection_policy": "Top three public-feature candidates by training CV F1, then validation F1",
         "test": test_metrics,
         "candidate_ranking": [asdict(result) for result in ranked],
         "feature_order": winning_features,

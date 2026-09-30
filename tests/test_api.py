@@ -1,6 +1,8 @@
+import pytest
 from fastapi.testclient import TestClient
 
 from api.main import app
+from creditwise import inference
 
 client = TestClient(app)
 
@@ -37,6 +39,7 @@ def test_distribution_and_group_denominators_are_consistent() -> None:
 
     groups = client.get("/api/dataset/groups", params={"feature": "Loan_Purpose"})
     assert groups.status_code == 200
+    assert sum(group["total"] for group in groups.json()["groups"]) + groups.json()["missing"] == groups.json()["total"]
     for group in groups.json()["groups"]:
         assert group["labeled"] == group["approved"] + group["not_approved"]
         assert group["total"] == group["labeled"] + group["unknown"]
@@ -57,3 +60,38 @@ def test_preview_redacts_source_identifier() -> None:
     payload = response.json()
     assert payload["rows"][0]["record"] == "Record 0001"
     assert "Applicant_ID" not in payload["columns"]
+
+
+def test_preview_preserves_unknown_target() -> None:
+    response = client.get("/api/dataset/preview", params={"offset": 15, "limit": 1})
+    assert response.status_code == 200
+    assert response.json()["rows"][0]["Loan_Approved"] == "Unknown"
+
+
+def test_relationship_can_use_the_same_feature_on_both_axes() -> None:
+    response = client.get("/api/dataset/relationship", params={"x": "Credit_Score", "y": "Credit_Score"})
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["correlation"] == 1
+    assert all(point["x"] == point["y"] for point in payload["points"])
+
+
+@pytest.mark.parametrize("artifact", [None, b"not a joblib model"])
+def test_missing_or_corrupt_model_returns_service_unavailable(tmp_path, monkeypatch, artifact) -> None:
+    path = tmp_path / "model.joblib"
+    if artifact is not None:
+        path.write_bytes(artifact)
+    monkeypatch.setattr(inference, "DEFAULT_MODEL_PATH", path)
+    for endpoint in ("/api/health", "/api/metadata"):
+        response = client.get(endpoint)
+        assert response.status_code == 503
+    assert client.get("/api/health").json()["model_ready"] is False
+    applicant = {
+        "Applicant_Income": 1000, "Employment_Status": "Salaried", "Credit_Score": 700,
+        "DTI_Ratio": 0.3, "Loan_Amount": 1000, "Loan_Purpose": "Home",
+        "Property_Area": "Urban", "Education_Level": "Graduate", "Employer_Category": "Private",
+    }
+    assert client.post("/api/predict", json=applicant).status_code == 503
+    assert client.post("/api/compare", json={"baseline": applicant, "scenario": applicant}).status_code == 503
+    # Exploration is still usable when the model is unavailable.
+    assert client.get("/api/dataset/schema").status_code == 200

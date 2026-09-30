@@ -14,7 +14,10 @@ function validationMessage(detail: unknown): string {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, init)
+  const signal = init?.signal
+    ? AbortSignal.any([init.signal, AbortSignal.timeout(15000)])
+    : AbortSignal.timeout(15000)
+  const response = await fetch(`${API_BASE_URL}${path}`, { ...init, signal })
   if (!response.ok) {
     const payload = await response.json().catch(() => ({ detail: 'Request failed.' }))
     throw new Error(validationMessage(payload.detail))
@@ -34,9 +37,9 @@ export const api = {
   summary: () => request<DatasetSummary>('/api/dataset/summary'),
   metadata: () => request<ModelMetadata>('/api/metadata'),
   schema: () => request<DatasetSchema>('/api/dataset/schema'),
-  preview: (offset = 0, limit = 15) => request<Preview>(query('/api/dataset/preview', { offset, limit })),
-  distribution: (feature: string, filterFeature?: string, filterValue?: string) => request<Distribution>(query('/api/dataset/distribution', { feature, filter_feature: filterFeature, filter_value: filterValue })),
-  relationship: (x: string, y: string, filterFeature?: string, filterValue?: string) => request<Relationship>(query('/api/dataset/relationship', { x, y, filter_feature: filterFeature, filter_value: filterValue })),
-  groups: (feature: string, filterFeature?: string, filterValue?: string) => request<Groups>(query('/api/dataset/groups', { feature, filter_feature: filterFeature, filter_value: filterValue })),
-  compare: (baseline: Applicant, scenario: Applicant) => request<Comparison>('/api/compare', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ baseline, scenario }) }),
+  preview: (offset = 0, limit = 15, signal?: AbortSignal) => request<Preview>(query('/api/dataset/preview', { offset, limit }), { signal }),
+  distribution: (feature: string, filterFeature?: string, filterValue?: string, signal?: AbortSignal) => request<Distribution>(query('/api/dataset/distribution', { feature, filter_feature: filterValue ? filterFeature : undefined, filter_value: filterValue }), { signal }),
+  relationship: (x: string, y: string, filterFeature?: string, filterValue?: string, signal?: AbortSignal) => request<Relationship>(query('/api/dataset/relationship', { x, y, filter_feature: filterValue ? filterFeature : undefined, filter_value: filterValue }), { signal }),
+  groups: (feature: string, filterFeature?: string, filterValue?: string, signal?: AbortSignal) => request<Groups>(query('/api/dataset/groups', { feature, filter_feature: filterValue ? filterFeature : undefined, filter_value: filterValue }), { signal }),
+  compare: (baseline: Applicant, scenario: Applicant, signal?: AbortSignal) => request<Comparison>('/api/compare', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ baseline, scenario }), signal }),
 }

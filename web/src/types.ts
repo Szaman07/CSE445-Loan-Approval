@@ -45,7 +45,7 @@ export type Relationship = {
   points: Array<{ x: number; y: number; outcome: string }>
 }
 export type Groups = {
-  feature: string; display_name: string; total: number
+  feature: string; display_name: string; total: number; missing: number
   groups: Array<{ label: string; total: number; labeled: number; approved: number; not_approved: number; unknown: number; approval_rate: number | null }>
 }
 export type Candidate = { name: string; cv_f1_mean: number; cv_f1_std: number; cv_average_precision_mean: number; cv_recall_mean: number; cv_precision_mean: number }

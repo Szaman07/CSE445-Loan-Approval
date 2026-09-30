@@ -120,7 +120,7 @@ def select_threshold(y_true: pd.Series, probabilities: np.ndarray) -> tuple[floa
     candidates = np.linspace(0.05, 0.95, 901)
     scores = np.asarray([f1_score(y_true, probabilities >= t) for t in candidates])
     best = scores.max()
-    tied = np.flatnonzero(np.isclose(scores, best, atol=1e-12))
+    tied = np.flatnonzero(np.isclose(scores, best, rtol=0, atol=1e-12))
     index = tied[np.argmin(np.abs(candidates[tied] - 0.5))]
     threshold = float(candidates[index])
     return threshold, threshold_metrics(y_true, probabilities, threshold)

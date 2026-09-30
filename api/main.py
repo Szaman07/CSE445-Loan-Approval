@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-import json
 import os
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, Query
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from creditwise.data import load_dataset
 from creditwise.exploration import (
@@ -16,14 +17,14 @@ from creditwise.exploration import (
     relationship_payload,
     schema_payload,
 )
-from creditwise.inference import compare, load_bundle, predict
+from creditwise.inference import ModelUnavailableError, compare, load_bundle, predict
 from creditwise.schemas import (
     ApplicantInput,
     ComparisonRequest,
     ComparisonResponse,
     PredictionResponse,
 )
-from creditwise.settings import DEFAULT_DATA_PATH, DEFAULT_METADATA_PATH
+from creditwise.settings import DEFAULT_DATA_PATH
 
 app = FastAPI(
     title="CreditWise API",
@@ -41,27 +42,38 @@ app.add_middleware(
 )
 
 
+@app.exception_handler(RequestValidationError)
+async def invalid_input_handler(request, error: RequestValidationError) -> JSONResponse:
+    # Invalid input can contain infinity, which cannot be serialized in a JSON response.
+    details = [{key: item[key] for key in ("loc", "msg", "type")} for item in error.errors()]
+    return JSONResponse(status_code=422, content={"detail": details})
+
+
+@app.exception_handler(ModelUnavailableError)
+async def model_unavailable_handler(request, error: ModelUnavailableError) -> JSONResponse:
+    return JSONResponse(status_code=503, content={"detail": str(error)})
+
+
 @app.get("/api/health")
-def health() -> dict[str, object]:
+def health() -> JSONResponse:
     model_ready = True
     detail = "ready"
     try:
         load_bundle()
-    except (FileNotFoundError, OSError, ValueError, EOFError) as error:
+    except ModelUnavailableError as error:
         model_ready = False
         detail = str(error)
-    return {
+    return JSONResponse(status_code=200 if model_ready else 503, content={
         "status": "ok" if model_ready else "degraded",
         "model_ready": model_ready,
         "detail": detail,
-    }
+    })
 
 
 @app.get("/api/metadata")
 def metadata() -> dict[str, object]:
-    if not DEFAULT_METADATA_PATH.exists():
-        raise HTTPException(status_code=503, detail="Model metadata is unavailable.")
-    return json.loads(DEFAULT_METADATA_PATH.read_text(encoding="utf-8"))
+    # Serve evidence from the same bundle used for predictions.
+    return load_bundle()["metadata"]
 
 
 @app.get("/api/dataset/summary")
@@ -149,15 +161,9 @@ def dataset_groups(
 
 @app.post("/api/predict", response_model=PredictionResponse)
 def predict_endpoint(applicant: ApplicantInput) -> PredictionResponse:
-    try:
-        return predict(applicant)
-    except FileNotFoundError as error:
-        raise HTTPException(status_code=503, detail=str(error)) from error
+    return predict(applicant)
 
 
 @app.post("/api/compare", response_model=ComparisonResponse)
 def compare_endpoint(request: ComparisonRequest) -> ComparisonResponse:
-    try:
-        return compare(request.baseline, request.scenario)
-    except FileNotFoundError as error:
-        raise HTTPException(status_code=503, detail=str(error)) from error
+    return compare(request.baseline, request.scenario)

@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = Path(
+    os.getenv("CREDITWISE_PROJECT_ROOT", str(Path(__file__).resolve().parents[2]))
+).resolve()
 WORKSPACE_ROOT = PROJECT_ROOT.parent
 
 DEFAULT_DATA_PATH = PROJECT_ROOT / "data" / "loan_approval_data.csv"

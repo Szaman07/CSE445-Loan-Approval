@@ -1,6 +1,7 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { api } from './api'
 import { Layout } from './components/Layout'
+import { RouteFocus } from './components/RouteFocus'
 import { pathFor, routeForPath } from './routes'
 import type { DatasetSchema, DatasetSummary, ModelMetadata, RouteId } from './types'
 
@@ -16,15 +17,17 @@ export default function App() {
   const [summary, setSummary] = useState<DatasetSummary>()
   const [metadata, setMetadata] = useState<ModelMetadata>()
   const [schema, setSchema] = useState<DatasetSchema>()
-  const mainHeading = useRef<HTMLElement | null>(null)
+  const [schemaError, setSchemaError] = useState<string>()
 
   useEffect(() => {
-    Promise.allSettled([api.health(), api.summary(), api.metadata(), api.schema()]).then(([health, summaryResult, metadataResult, schemaResult]) => {
-      setApiReady(health.status === 'fulfilled' && health.value.model_ready)
-      if (summaryResult.status === 'fulfilled') setSummary(summaryResult.value)
-      if (metadataResult.status === 'fulfilled') setMetadata(metadataResult.value)
-      if (schemaResult.status === 'fulfilled') setSchema(schemaResult.value)
+    let active = true
+    api.health().then((value) => { if (active) setApiReady(value.model_ready) }, () => { if (active) setApiReady(false) })
+    api.summary().then((value) => { if (active) setSummary(value) }, () => {})
+    api.metadata().then((value) => { if (active) setMetadata(value) }, () => {})
+    api.schema().then((value) => { if (active) setSchema(value) }, (error) => {
+      if (active) setSchemaError(error instanceof Error ? error.message : 'Dataset schema unavailable.')
     })
+    return () => { active = false }
   }, [])
   useEffect(() => {
     const onPopState = () => setRoute(routeForPath(window.location.pathname))
@@ -34,20 +37,16 @@ export default function App() {
   useEffect(() => {
     document.title = `${route[0].toUpperCase()}${route.slice(1)} · CreditWise`
     window.scrollTo({ top: 0 })
-    window.setTimeout(() => {
-      const heading = document.querySelector<HTMLElement>('#main-content h1')
-      heading?.setAttribute('tabindex', '-1'); heading?.focus(); mainHeading.current = heading
-    }, 0)
   }, [route])
   const navigate = (next: RouteId) => {
     if (next === route) return
     window.history.pushState({}, '', pathFor(next)); setRoute(next)
   }
-  return <Layout route={route} navigate={navigate} apiReady={apiReady}><Suspense fallback={<div className="route-loading">Loading view…</div>}>
+  return <Layout route={route} navigate={navigate} apiReady={apiReady}><Suspense fallback={<div className="route-loading">Loading view…</div>}><RouteFocus key={route}>
     {route === 'overview' && <Overview summary={summary} metadata={metadata} navigate={navigate} evidenceReady={Boolean(metadata)} />}
-    {route === 'explore' && <Explore schema={schema} />}
+    {route === 'explore' && <Explore schema={schema} schemaError={schemaError} />}
     {route === 'simulator' && <Simulator modelReady={Boolean(apiReady)} />}
     {route === 'model' && <Model metadata={metadata} />}
     {route === 'about' && <About />}
-  </Suspense></Layout>
+  </RouteFocus></Suspense></Layout>
 }

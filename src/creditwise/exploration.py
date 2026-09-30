@@ -55,6 +55,12 @@ def _clean_value(value: Any) -> Any:
     return value
 
 
+def outcome_label(value: Any) -> str:
+    if pd.isna(value):
+        return "Unknown"
+    return "Approved" if value == 1 else "Not approved"
+
+
 def validate_feature(feature: str, *, categorical_only: bool = False) -> str:
     allowed = EXPLORER_CATEGORICAL_FEATURES if categorical_only else EXPLORER_FEATURES
     if feature not in allowed:
@@ -115,13 +121,7 @@ def preview_payload(frame: pd.DataFrame, *, offset: int, limit: int) -> dict[str
     ):
         row = {"record": f"Record {index:04d}"}
         row.update({feature: _clean_value(record[feature]) for feature in columns})
-        row[TARGET_COLUMN] = (
-            "Approved"
-            if record[TARGET_COLUMN] == 1
-            else "Not approved"
-            if record[TARGET_COLUMN] == 0
-            else "Unknown"
-        )
+        row[TARGET_COLUMN] = outcome_label(record[TARGET_COLUMN])
         rows.append(row)
     return {
         "total": len(frame),
@@ -196,15 +196,11 @@ def relationship_payload(frame: pd.DataFrame, x: str, y: str, limit: int) -> dic
     validate_feature(y)
     if x not in EXPLORER_NUMERIC_FEATURES or y not in EXPLORER_NUMERIC_FEATURES:
         raise HTTPException(status_code=400, detail="Relationship axes must be numeric features.")
-    valid = frame[[x, y, TARGET_COLUMN]].dropna(subset=[x, y]).copy()
+    axes = list(dict.fromkeys([x, y]))
+    valid = frame[[*axes, TARGET_COLUMN]].dropna(subset=axes).copy()
     full_count = len(valid)
     if len(valid) > limit:
         valid = valid.sample(n=limit, random_state=42).sort_index()
-
-    def outcome_label(value: Any) -> str:
-        if pd.isna(value):
-            return "Unknown"
-        return "Approved" if value == 1 else "Not approved"
 
     points = [
         {
@@ -214,8 +210,12 @@ def relationship_payload(frame: pd.DataFrame, x: str, y: str, limit: int) -> dic
         }
         for _, row in valid.iterrows()
     ]
-    corr_source = frame[[x, y]].dropna()
-    correlation = float(corr_source[x].corr(corr_source[y])) if len(corr_source) > 1 else None
+    corr_source = frame[axes].dropna()
+    correlation = (
+        float(corr_source[x].corr(corr_source[y]))
+        if len(corr_source) > 1 and corr_source[x].nunique() > 1 and corr_source[y].nunique() > 1
+        else None
+    )
     return {
         "x": x,
         "y": y,
@@ -254,5 +254,6 @@ def groups_payload(frame: pd.DataFrame, feature: str) -> dict[str, Any]:
         "feature": feature,
         "display_name": DISPLAY_NAMES[feature],
         "total": len(frame),
+        "missing": int(frame[feature].isna().sum()),
         "groups": rows,
     }

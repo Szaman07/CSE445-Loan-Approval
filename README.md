@@ -1,6 +1,6 @@
 # CSE445 Loan Approval
 
-A loan approval classification project built with scikit-learn, FastAPI, and React.
+A CSE445 course project using an instructor-provided loan approval dataset, scikit-learn, FastAPI, and React.
 
 The model uses a fixed train, validation, and test split. Preprocessing is fitted inside the scikit-learn pipeline, and the classification threshold is selected on validation data before final test evaluation.
 
@@ -38,7 +38,7 @@ data/                source dataset
 
 ## Run locally
 
-Requires Python 3.11 or 3.12 and Node.js 20 or later.
+Requires Python 3.11 or 3.12 and Node.js 22.12 or later.
 
 ```powershell
 python -m venv .venv

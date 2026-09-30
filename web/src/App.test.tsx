@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
 
@@ -29,7 +29,7 @@ describe('CreditWise course project', () => {
       return Promise.resolve(new Response(JSON.stringify({ detail: 'Not found' }), { status: 404 }))
     }))
   })
-  afterEach(() => vi.unstubAllGlobals())
+  afterEach(() => { cleanup(); vi.unstubAllGlobals() })
 
   it('uses routes and completes a scenario comparison', async () => {
     render(<App />)
@@ -40,7 +40,7 @@ describe('CreditWise course project', () => {
     expect(await screen.findByRole('heading', { name: /Compare two applicant profiles/i })).toBeInTheDocument()
     fireEvent.change(screen.getByLabelText('Credit score'), { target: { value: '730' } })
     fireEvent.click(screen.getByRole('button', { name: 'Compare scenario' }))
-    await waitFor(() => expect(screen.getByText('+3.4%')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('+3.4 pp')).toBeInTheDocument())
     fireEvent.change(screen.getByLabelText('Credit score'), { target: { value: '740' } })
     expect(screen.getByText(/Inputs changed/)).toBeInTheDocument()
   })
